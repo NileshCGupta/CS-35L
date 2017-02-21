@@ -1,0 +1,9 @@
+1. If the other team were observing all the bytes transmitted across the network, communication should still be secure since all the transmitted information would be encrypted. They would not be able to obtain any meaningful information from this jibberish without the private key.
+
+If the other team had access to our keystrokes, then they would only have access to our public key and passphrase since that is all we type when sending files, not our private key. Thus, they still would not be able to see the data unless we typed the actual data, in which case, our data is compromised.
+
+If the other team got a hold of our USB, then they would have access to our private key. Using this, they can decrypt all of the data on the network and our system is compromised. This means that a physical security leak is a huge weakness.
+
+2. The --verify flag of the gpg command only tells you if the file has been tampered with since its creation, not whether we personally created the file. Thus, the command would have no use protecting the file from attackers.
+
+To fix this, we would need a third party to manage who the public key, that encrypted the file, belongs to. 

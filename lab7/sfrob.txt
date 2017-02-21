@@ -1,0 +1,37 @@
+I now test the time it takes for each of my sfrob programs to run.
+
+First, I create a large file using
+> head --byte=5000000 /dev/urandom > bigfile.txt
+
+The results of the executions are shown below
+sfrob
+> time ./sfrob < bigfile.txt
+real	0m0.002s
+user	0m0.000s
+sys	0m0.001s
+
+sfrobu
+> time ./sfrobu < bigfile.txt
+Comparisons: 253304
+real     0m11.239s
+user     0m0.318s
+sys      0m6.731s
+
+sfrobs
+> time ./sfrobs < bigfile.txt
+real   0m3.215s
+user   0m0.050s
+sys    0m0.137s
+
+Clearly, the unbuffered sfrob, sfrob, is the most efficient program followed by the shell scipt and finally the unbuffered sfrob, sfrobu.
+
+Next, I checked the number of comparisons as a function of file size for sfrobu. For the input file, I used the example data in assignment 5 and copied it to get the right file size.
+
+# of words	    Comparisons
+----------	    -----------
+10		    24
+100		    468
+1000		    7392
+10000		    128103
+
+Apparently, sfrobu becomes exponentially inefficient as n increases.

@@ -1,0 +1,111 @@
+first I use wget to get a copy of coreutils-7.6 using url
+ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz
+
+I decompress the .gz file using
+tar -xzvf coreutils-7.6.tar.gz
+
+I make a coreutilsInstall directory in my root directory
+mkdir ~/coreutilsInstall
+
+then I configure coreutils into ~/coreutilsInstall directory with
+./configure --prefix=/u/cs/ugrad/chander/coreutilsInstall
+
+I make and install it using
+make
+make install
+
+To reproduce the bug on my machine I use the ls command in my coreutilsInstall
+~/coreutilsInstall/bin/ls -l
+
+I open up emacs and paste Brady's patch into patch_file and apply this using
+patch -p1 < patch_file
+I use p1 when I'm in the coreutils-7.6 directory
+I would use p0 if I patched from my root directory
+I get the output:
+Hunk #1 succeeded at 397 with fuzz 2 (offset 365 lines).
+patching file src/ls.c
+Hunk #1 succeeded at 2013 (offset -1 lines).
+patch unexpectedly ends in middle of line
+Hunk #2 succeeded at 2028 with fuzz 2 (offset -1 lines).
+
+I then make the file from my coreutils-7.6 (top of my src tree). I get the output:
+make  all-recursive
+make[1]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6'
+Making all in lib
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/lib'
+make  all-recursive
+make[3]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/lib'
+make[4]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/lib'
+make[4]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/lib'
+make[3]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/lib'
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/lib'
+Making all in src
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+make  all-am
+make[3]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+  CC     ls.o						
+  CCLD   dir						
+  CCLD   vdir
+  CCLD   ls
+make[3]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+Making all in doc
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/doc'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/doc'
+Making all in man
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/man'
+  GEN    dir.1
+  GEN    vdir.1
+  GEN    ls.1
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/man'
+Making all in po
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/po'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/po'
+Making all in tests
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/tests'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/tests'
+Making all in gnulib-tests
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/gnulib-tests'
+make  all-recursive
+make[3]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/gnulib-tests'
+make[4]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/gnulib-tests'
+make[4]: Nothing to be done for `all-am'.
+make[4]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/gnulib-tests'
+make[3]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/gnulib-tests'
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/gnulib-tests'
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6'
+make[2]: Nothing to be done for `all-am'.
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6'
+make[1]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6'
+
+
+The relevant portion is:
+make[3]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+  CC     ls.o                                           # compiles ls.o
+  CCLD   dir                                            # that needed to be made
+  CCLD   vdir
+  CCLD   ls
+make[3]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/src'
+Making all in doc
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/doc'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/doc'
+Making all in man
+make[2]: Entering directory `/w/home.10/cs/ugrad/chander/coreutils-7.6/man'
+  GEN    dir.1
+  GEN    vdir.1
+  GEN    ls.1
+
+We see the CC command compiles the files while the CCLD links the files. Finally, the GEN command generates the files. 
+
+Last, we test the modified ls command by creating two files - one recent and one a year old using
+touch recent_file
+touch -t 201504170959.30 old_file
+
+Using the command
+~/coreutils-7.6/src/ls -l 
+in the root directory we get the desired date format

@@ -1,0 +1,129 @@
+=============
+Nilesh Gupta
+UID: 604489201
+==============
+
+1. I wrote tr2b.c using an algorithm that compares each char in the 'from' input to the current char under inspection. If they are equal, then I replace that char with the corresponding char in the 't
+o' input and set a flag. If, when it exits the loop comparing the 'from' chars to the current char, the flag is not set, then I output the current char.
+
+I also added the two error messages that check for equal input string lengths and for all distinct chars in the 'from' input.
+
+2. I copied tr2b.c into file tr2u.c. For this unbuffered translate, I changed the while condition to use the return of the read function since the char that read stores the current character in did no
+t seem to recognize the EOF signal here. Besides that, I changed getchar() and putchar() to read() and write() using the appropriate file descriptors for each.
+
+Initially, the program would end in an infinite loop when it ran. I then changed the write function from write(1, &argv[2][k], 1) to what it is now and removed some of the checks for test == -1 inside
+ the while loop. It would then only work when I piped in input but not with redirect. Then I changed nothing and it started working.
+
+3.
+(a) strace to file
+
+tr2b
+> strace -co strace_output ./tr2b 'AB' 'XY' < output.txt > test.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+  0.00    0.000000           0         2           read
+  0.00    0.000000           0         2           write
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0        10           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+  ------ ----------- ----------- --------- --------- ----------------
+  100.00    0.000000                    30         1 total
+
+tr2u
+> strace -co strace_output1 ./tr2u 'AB' 'XY' < output.txt > test.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.65    0.437119           0   5000000           write
+ 43.35    0.334509           0   5000002           read
+ 0.00    0.000000           0         2           open
+ 0.00    0.000000           0         2           close
+ 0.00    0.000000           0         2           fstat
+ 0.00    0.000000           0         8           mmap
+ 0.00    0.000000           0         3           mprotect
+ 0.00    0.000000           0         1           munmap
+ 0.00    0.000000           0         1           brk
+ 0.00    0.000000           0         1         1 access
+ 0.00    0.000000           0         1           execve
+ 0.00    0.000000           0         1           arch_prctl
+ ------ ----------- ----------- --------- --------- ----------------
+ 100.00    0.771628              10000024         1 total
+
+(b) strace to terminal
+
+tr2b
+> strace -co strace_copy ./tr2b 'AB' 'XY' < output.txt
+
+ % time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000063          32         2           read
+ 0.00    0.000000           0         1           write
+ 0.00    0.000000           0         2           open
+ 0.00    0.000000           0         2           close
+ 0.00    0.000000           0         4           fstat
+ 0.00    0.000000           0        10           mmap
+ 0.00    0.000000           0         3           mprotect
+ 0.00    0.000000           0         1           munmap
+ 0.00    0.000000           0         1           brk
+ 0.00    0.000000           0         1         1 access
+ 0.00    0.000000           0         1           execve
+ 0.00    0.000000           0         1           arch_prctl
+ ------ ----------- ----------- --------- --------- ----------------
+ 100.00    0.000063                    29         1 total
+
+tr2u
+> strace -co strace_copy1 ./tr2u 'AB' 'XY' < output.txt
+
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.62    0.581252           0   5000000           write
+ 42.38    0.427550           0   5000002           read
+ 0.00    0.000000           0         2           open
+ 0.00    0.000000           0         2           close
+ 0.00    0.000000           0         2           fstat
+ 0.00    0.000000           0         8           mmap
+ 0.00    0.000000           0         3           mprotect
+ 0.00    0.000000           0         1           munmap
+ 0.00    0.000000           0         1           brk
+ 0.00    0.000000           0         1         1 access
+ 0.00    0.000000           0         1           execve
+ 0.00    0.000000           0         1           arch_prctl
+ ------ ----------- ----------- --------- --------- ----------------
+ 100.00    1.008802              10000024         1 total
+
+
+4.
+time to file
+tr2b
+> time ./tr2b 'abc' 'xyz' < output.txt > out.txt
+real   0m0.026s
+user   0m0.002s
+sys    0m0.000s
+
+tr2u
+real	0m5.442s
+user	0m0.340s
+sys	0m4.988s
+
+time to terminal
+tr2b
+> time ./tr2b 'abc' 'xyz' < output.txt
+real  0m0.003s
+user  0m0.000s
+sys   0m0.001s
+
+tr2u
+> time ./tr2u 'abc' 'xyz' < output.txt
+real  0m7.100s
+user  0m0.353s
+sys   0m6.741s
+
+From these 8 tests, we see that the buffered I/O consistently outperforms the unbuffered I/O by a factor of hundreds of thousands. 

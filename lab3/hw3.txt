@@ -1,0 +1,7 @@
+Q1. Brady's patch removes the "case_long_iso_time_style:" line since it makes t	he program more readable. It does not change any of the functionality of the c ode since the case statement would have cascaded down regardless. 
+
+Q2. Brady's patch removes the code that uses the user's locale so the date time format is no longer properly localized. This would mean that users in non-En   glish speaking countries would see English month abbreviations. If we wanted t o implement this in all machines, we would have to make the user's locale depe nd on his location.
+
+Q3. The compiler encounters an Index error when trying to access lines from the empty file. This is because there are no lines in the file so it cannot random ly choose lines. 
+
+Q4. We get a syntax error when we run this script using python3. This is becaus	e python3 adopts a different syntax from python2 so code written in python2 wi ll no longer be read correctly.  

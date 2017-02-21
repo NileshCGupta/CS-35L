@@ -1,0 +1,54 @@
+I first check if I have all the necessary programs to do the lab using
+> dpkg –get-selections | grep openssh
+
+It outputs:
+openssh-server install
+openssh-client install
+
+which means I can proceed.
+
+Server:
+I start by generating the public and private keys with
+> ssh-keygen
+
+and RETURN three times to use the default location.
+
+This gives me the key fingerprint and the key randomart image.
+
+I then create an account for the client (Perla Bravo) with Username - Username and Password - Password
+> sudo useradd -d /home/Perla -m Username
+> sudo passwd Password
+
+To make an .ssh directory for the new user, I use
+> cd /home/Perla
+> sudo mkdir .ssh
+
+Next I change ownwership and permission of the .ssh directory using
+> sudo chown -R Username .ssh
+> sudo chmod 700 .ssh
+
+Perla then follows the client instructions on his computer and is able to use my computer as a remote host.
+
+Client:
+I generate public and private keys using
+> ssh-keygen
+
+I need to copy my public key to the server so it can authenticate my host
+> ssh-copy-id -i Username@10.97.85.170
+
+Then I add the private key to the ssh-agent
+> ssh-add
+
+Next I ssh to my "teammate's" server
+> ssh Username@10.97.85.170
+
+This ssh is successful so I exit and use
+> ssh -X Username@10.97.85.170
+to enable X11 session forwarding
+
+I then run the following commands on the remote host
+xterm
+gedit
+firefox
+
+These all work which mean I successfully connected to the remote server.
