@@ -1,0 +1,35 @@
+#!/bin/bash
+export LC_ALL='C'
+
+# extract Hawaiian words
+grep "<td>" |
+
+# upper to lower
+tr '[:upper:]' '[:lower:]' |
+
+# eliminates tab space
+sed '/^\s*$/d' |
+
+# deletes odd lines to only get the Hawaiian words
+sed -n '0~2p' |
+
+# deletes html tags
+sed 's/<[^>]*>//g' |
+
+# creates new lines for words separated by a space
+tr " "  "\n" |
+
+# treat ` as '
+sed 's/`/'"'"'/g' |
+
+# eliminates commas
+tr -d ',' |
+
+# only keeps words containing Hawaiian characters
+grep -v "[^pk'mnwlhaeiou]" |
+
+# sorts
+sort -u |
+
+# deletes line at the beginning
+sed '1d'

@@ -1,0 +1,86 @@
+I installed the bugged version of coreutils using
+> 'Wget' 
+http://web.cs.ucla.edu/classes/spring16/cs35L/assign/coreutils-with-bug.tar.gz
+
+I then unzipped it using
+> tar -xvzf coreutils-with-bug.tar.gz
+
+After entering into the directory, I configured it using
+> ./configure CFLAGS="-g"
+
+I built it with:
+> make
+
+I received the following errors:
+
+Makefile:659: recipe for target 'utimecmp.o' failed
+make[3]: *** [utimecmp.o] Error 1
+make[3]: Leaving directory '/u/cs/ugrad/chander/coreutils-with-bug/lib'
+Makefile:414: recipe for target 'all' failed
+make[2]: *** [all] Error 2
+make[2]: Leaving directory '/u/cs/ugrad/chander/coreutils-with-bug/lib'
+Makefile:419: recipe for target 'all-recursive' failed
+make[1]: *** [all-recursive] Error 1
+make[1]: Leaving directory '/u/cs/ugrad/chander/coreutils-with-bug'
+Makefile:357: recipe for target 'all' failed
+make: *** [all] Error 2
+
+These errors were caused by conflicting types for the 'futimens' variable.
+
+I got the patch using
+> wget http://web.cs.ucla.edu/classes/fall15/cs35L/assign/coreutils.diff
+
+I applied this using
+> patch -p0 < coreutils.diff
+
+The following files are patched:
+patching file lib/utimens.c
+patching file lib/utimens.h
+patching file src/copy.c
+patching file src/tee.c
+patching file src/touch.c
+
+We rebuild it using
+> make
+
+and see that the patch fixed the error by renaming the 'futimens' variable to 
+'coreutils_futimens'. This avoids the name collision  between the 'futimens' 
+variable in coreutils and the server module with the same name.
+
+We then reproduce the bug problem inputting the lab instructions:
+$ tmp=$(mktemp -d)
+$ cd $tmp
+$ touch -d '1918-11-11 11:00 GMT' wwi-armistice
+$ touch now
+$ sleep 1
+$ touch now1
+$ TZ=UTC0 ~/coreutils-with-bug/src/ls -lt --full-time wwi-armistice now now1
+-rw-r--r-- 1 eggert csfac 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 eggert csfac 0 2013-04-29 16:42:48.358233532 +0000 now1
+-rw-r--r-- 1 eggert csfac 0 2013-04-29 16:42:47.355197103 +0000 now
+
+As we see, the ls function does not output the files in correct chronological 
+order.
+
+To debug the program, I ran gdb in the ls.c file. I set breakpoints at 
+functions that would compare the time between two files. I then stepped through 
+each instruction using the 's' command. In each function, I looked for an 
+inconsistency by printing the local variables using the 'print' command.
+
+After tracing through the program, I found that the timespec_cmp function, in 
+timespec.h, would return the difference between the tv_sec values of two files. 
+If one of the files had a timestamp before Jan 1, 1970, it would have a 
+negative tv_sec value. When this value is largely negative and the other file 
+is largely positive, the difference between them would overflow and return a 
+negative value when it should return a postive value.
+
+To fix this, I created a check to see if one of the two tv_sec values was 
+negative. If a was negative and b was positive, I return a 1. If b was negative 
+and a was positive, I return -1.
+
+To test my solution, I created a copy of timespec.h called timespec2.h and 
+inputted my changes. I then generated the patch using
+> diff -u ./lib/timespec.h ./lib/timespec2.h > patch_file.txt
+
+I then wrote a ChangeLog file and catted this and the patch using
+> cat ChangeLog patch_file.txt > lab5.diff

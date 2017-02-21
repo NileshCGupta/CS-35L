@@ -1,0 +1,7 @@
+The upper left pane of the window shows all commits in order of recency  alongside the commit message. To the right, we can see the author of the commit and the date of the commit to the right of that.
+
+If we look directly below the top left pane, we can see the ID of the commit. Our commit ID is 242354a23acf214ad06d4e3e7e5f5580c8b21d4a. We can get what row we are on to the right of this as well as the total number of rows, or commits.
+
+The bottom left pane shows us the full diff file of our commit. We can also choose to see the old version or new version of the file.
+
+The bottom right pane shows us the total number of files impacted by the commit. If we click on the name of the file, the diff pane automatically takes us to where the file was modified.

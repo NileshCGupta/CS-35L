@@ -1,0 +1,43 @@
+First, I created a new branch called quote
+       git checkout v3.0 -b quote
+
+I then applied the patch I got from lab
+       patch -p1 < quote-3.0-patch.txt
+
+I ran into some problems here since the repository was already patched from the lab so I redownloaded diffutils and it worked. I get the output
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+Next I created a ChangeLog in my diffutils directory and added all six modified files with a brief description of what changed.
+
+Then I commit the changes
+      git add .
+      git commit -F ChangeLog
+The above command configures my name and email as the committer
+
+Then I output the formatted patch into a file using
+      git format-patch -1 --stdout > formatted-patch.txt
+
+Since I do not have a partner, I just created a new branch to test the patch
+      git checkout v3.0 -b allalone
+      git am < formatted-patch.txt
+
+Next, we build the system
+      ./bootstrap
+      ./configure
+      make
+      make check
+
+I initially had a problem with ./bootstrap but I followed the advice on piazza and made changes to the .login, .bashrc, and .bash_profile files. This resolved the PATH issue.
+
+Now, I check if my ChangeLog works using
+     make distdir
+     cd diffutils*
+
+I look at the ChangeLog file for this and indeed see the original message I entered for the ChangeLog when I created formatted-patch.txt
+
+Last, I downloaded X11 for OS X and used the ssh -X command to access the server. I then cd into ~eggert/src/gnu/emacs and ran gitk.

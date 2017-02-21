@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# stores the first argument as the directory
+dir=$1;
+cd $dir
+# move to directory
+
+# make unsorted and sorted file array
+declare -a allfiles
+declare -a regfiles
+declare -a sortedfiles
+
+let allcount=0
+let regcount=0
+let sortedcount=0
+
+allfiles='ls -f | sort'
+
+# inputs all hidden files first into the sorted array 
+for FILE in ${allfiles[@]}
+do
+
+    if[ ! -L "$FILE" ]
+
+	then
+	if [ -f "$FILE" ]
+
+	    then
+	    if [ -r "$FILE" ] 
+		
+		then
+		filename=$(basename $FILE)
+
+		firstcharacter=${filename:0:1}
+
+		if [ "firstcharacter" == . ]:
+       
+		    
+		then
+		    sortedfiles[$sortedcount]="$FILE"
+		    let sortedcount=sortedcount+1
+		    
+		else
+		    
+		then
+		    regfiles[$regcount]="$FILE"
+		    let regcount=regcount+1
+		    
+		fi
+	    fi  
+	fi
+    fi	
+done
+
+# combines all regular files into the sorted array
+for FILE in ${regfiles[@]}
+do
+    sortedfiles[$sortedcount]="$FILE"
+    let sortedcount=sortedcount+1
+done
+
+# compares every file to every other file to find duplicates 
+for(( i=0; i<$sortedcount; i++ ))
+do
+
+    for(( j=i+1; j<$sortedcount; j++ ))
+    do
+
+	cmp -s ${sortedarray[$i]} ${sortedarray[$j]}
+	if[ $? -eq 0 ]
+	    
+        then
+	    # creates hard links of any duplicate files
+	    ln -f ${sortedarray[$i]} ${sortedarray[$j]}
+
+	fi
+    done
+done

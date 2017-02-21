@@ -1,0 +1,43 @@
+tr -c 'A-Za-z' '[\n*]' 
+This commmand replaces any instance of a character not included by 'A-Za-z' with a line break.
+
+tr -cs 'A-Za-z' '[\n*]'
+This does the same thing as the first command but eliminates all line break between words.
+
+tr -cs 'A-Za-z' '[\n*]' | sort
+This command takes the bare list of words given by the second command and sortsthem alphabetically.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+Takes the alphabetical list of words and removes duplicates.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+Gets the alphabetical list of words in  the assignment page and compares each to the words file. This outputs three columns: words unique to the assignment page, words unique to words, and words shared by both.
+
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+Same as the last command but only displays the words uniqure to the assignment file. This list consists of all mispelled words or words that are not in the words file (our dictionary). This command acts as a rudimentary spellchecker. 
+
+Then, I wrote the buildwords shell script using the grep, sed, sort and tr commands. This returns an alphabetical list of Hawaiian words used to spell check. 
+
+Using this, I find how many unique words or mispelled Hawaiian words are in the lab file using the following command
+comm labwords Hwords -23 | wc
+
+This outputs
+406     405    2602
+which means I have 405 unique or mispelled Hawaiian words.
+
+When I run the labwords file against my English spell check I get
+39      38     247
+which means I have 38 mispelled English words.
+
+Next, I find the number of mispelled Hawaiian words that are actually English using the command
+comm labwords Hwords -23 | comm -12 - words | wc
+
+This outputs
+370     370    2370
+which means that 370 of the 405 mispelled Hawaiian words are actually English. These are words like worry, position, save, that do not use Hawaiian characters
+
+To find the number of mispelled English words that are Hawaiian, I do the same command but switch the files
+
+This outputs
+3       3      15
+which means that 3 of the 38 mispelled English words are Hawaiian. These words are halau, lau, and wiki.

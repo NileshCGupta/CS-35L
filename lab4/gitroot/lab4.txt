@@ -1,0 +1,105 @@
+
+Downloaded diffutils with
+git clone git://git.savannah.gnu.org/diffutils.git
+
+cd into diffutils and create log file with
+git log > git-log.txt
+
+create tag file with
+git tags > git-tags.txt
+
+emacs the log file and find the commit code for the patch
+put this into patch file with
+git show 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f > quote-patch.txt
+
+we checkout version 3 with
+git checkout v3.0
+
+apply the patch with
+patch -p1 < quote-patch.txt
+from the diffutils directory
+
+use the status command to display changes
+git status
+# Not currently on any branch.
+# Changed but not updated:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+#       modified:   NEWS
+#       modified:   README
+#       modified:   TODO
+#       modified:   doc/diagmeet.note
+#       modified:   ms/config.bat
+#       modified:   ms/config.site
+#       modified:   po/en.po
+#       modified:   src/analyze.c
+#       modified:   src/cmp.c
+#       modified:   src/context.c
+#       modified:   src/diff.c
+#       modified:   src/diff.h
+#       modified:   src/diff3.c
+#       modified:   src/dir.c
+#       modified:   src/ifdef.c
+#       modified:   src/io.c
+#       modified:   src/sdiff.c
+#       modified:   src/side.c
+#       modified:   src/system.h
+#       modified:   src/util.c
+#       modified:   tests/help-version
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+#       #lab4.txt#
+#       .#lab4.txt
+#       NEWS.orig
+#       README-hacking.orig
+#       README-hacking.rej
+#       README.orig
+#       README.rej
+#       cfg.mk.orig
+#       cfg.mk.rej
+#       git-log.txt
+#       git-tags.txt
+#       lab4.txt
+#       ms/config.site.orig
+#       quote-patch.txt
+#       src/cmp.c.orig
+#       src/context.c.orig
+#       src/diff.c.orig
+#       src/diff.c.rej
+#       src/diff.h.orig
+#       src/diff3.c.orig
+#       src/diff3.c.rej
+#       src/dir.c.orig
+#       src/sdiff.c.orig
+#       src/system.h.orig
+#       src/util.c.orig
+#       tests/help-version.orig
+no changes added to commit (use "git add" and/or "git commit -a")
+
+The patch asked for other files to patch but I skipped passed all prompts
+
+I then go through all the non .c files and revert the changes in emacs using
+C-x v = 
+C-x v u
+
+I then go through the .c files to change everything except character string constants
+
+We then look in the src/*.c.rej files and copy paste all the changes into the respective files.
+
+When we run git status, we see half a dozen modified files and some untracked files. To remove these, we use 'git clean -f'.
+
+Next, we put git diff into a file using
+      git diff > quote-3.0-patch.txt
+
+To build the modified diffutils, we use
+   ./bootstrap
+   ./configure	
+   make
+   make check
+
+We verify that diffutils uses the right apostrophe character using 'diff . -'
+
+When we compare our quote-3.0-pach.txt and quote-3.0-test.txt, we see the files are not identical and the differences are not innocuous since we only kept the changes to code when we modified the .c files.
